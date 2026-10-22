@@ -1,0 +1,11 @@
+WebSecAudit v1.0.0 - secure-header & CORS auditor
+Only scan systems you own or have EXPLICIT written permission to test.
+This tool sends a handful of read-only GET/OPTIONS requests per target.
+Targets: http://localhost:8081/, http://localhost:8082/, http://localhost:8083/, http://localhost:8084/
+Authorisation confirmed via --yes.
+[*] scanning http://localhost:8081/
+[*] scanning http://localhost:8082/
+[*] scanning http://localhost:8083/
+[*] scanning http://localhost:8084/
+[+] JSON report written to sample_output/report.json
+[+] HTML report written to sample_output/report.html

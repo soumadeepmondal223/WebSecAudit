@@ -1,0 +1,572 @@
+{
+  "tool": "WebSecAudit",
+  "version": "1.0.0",
+  "generated_at": "2026-10-21T20:45:11+00:00",
+  "results": [
+    {
+      "target": "http://localhost:8081/",
+      "final_url": "http://localhost:8081/",
+      "status_code": 200,
+      "scanned_at": "2026-10-21T20:45:09+00:00",
+      "redirect_chain": [
+        "200 http://localhost:8081/"
+      ],
+      "requests_made": 3,
+      "error": "",
+      "findings": [
+        {
+          "check_id": "CORS-REFLECT-ORIGIN",
+          "category": "cors",
+          "title": "Arbitrary Origin is reflected WITH credentials",
+          "severity": "critical",
+          "description": "The server echoes whatever Origin it receives into Access-Control-Allow-Origin and allows credentials, so any website can make authenticated requests as the victim and read the responses.",
+          "evidence": "Origin: https://evil-attacker.example -> Access-Control-Allow-Origin: https://evil-attacker.example; Access-Control-Allow-Credentials: true",
+          "remediation": "Validate Origin against an exact allow-list of trusted origins and only then echo it; never combine reflection with Allow-Credentials.",
+          "reference": "https://portswigger.net/web-security/cors",
+          "cwe": "CWE-942"
+        },
+        {
+          "check_id": "HDR-CSP-UNSAFE-INLINE",
+          "category": "headers",
+          "title": "CSP allows 'unsafe-inline' scripts",
+          "severity": "medium",
+          "description": "Inline <script> and event handlers are allowed, which defeats most of CSP's XSS protection.",
+          "evidence": "script-src: 'self' 'unsafe-inline' 'unsafe-eval' https:",
+          "remediation": "Remove 'unsafe-inline'; use nonces or hashes instead.",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP",
+          "cwe": "CWE-693"
+        },
+        {
+          "check_id": "HDR-CSP-BROAD-SOURCE",
+          "category": "headers",
+          "title": "CSP allows scripts from overly broad sources",
+          "severity": "medium",
+          "description": "Scheme-wide or wildcard script sources let an attacker load code from any host.",
+          "evidence": "script-src contains: https:",
+          "remediation": "List explicit trusted hosts or use nonces with 'strict-dynamic'.",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP",
+          "cwe": "CWE-693"
+        },
+        {
+          "check_id": "HDR-XFO-MISSING",
+          "category": "headers",
+          "title": "No clickjacking protection",
+          "severity": "medium",
+          "description": "Neither X-Frame-Options nor CSP frame-ancestors is set, so the page can be framed by any site (UI redressing / clickjacking).",
+          "evidence": "X-Frame-Options and CSP frame-ancestors not present.",
+          "remediation": "Content-Security-Policy: frame-ancestors 'none'  (or 'self'); add X-Frame-Options: DENY for legacy browsers.",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options",
+          "cwe": "CWE-1021"
+        },
+        {
+          "check_id": "HDR-REFERRER-UNSAFE",
+          "category": "headers",
+          "title": "Referrer-Policy leaks full URLs",
+          "severity": "medium",
+          "description": "unsafe-url sends the full URL (path and query) to every destination, including over HTTP.",
+          "evidence": "Referrer-Policy: unsafe-url",
+          "remediation": "Referrer-Policy: strict-origin-when-cross-origin  (or no-referrer)",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy",
+          "cwe": "CWE-200"
+        },
+        {
+          "check_id": "COOKIE-HTTPONLY-sessionid",
+          "category": "cookies",
+          "title": "Cookie 'sessionid' missing HttpOnly flag",
+          "severity": "medium",
+          "description": "JavaScript can read the cookie, so any XSS can steal it.",
+          "evidence": "Cookie 'sessionid' (value redacted); attributes: path",
+          "remediation": "Add the HttpOnly attribute.",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie",
+          "cwe": "CWE-1004"
+        },
+        {
+          "check_id": "CORS-PREFLIGHT-METHODS",
+          "category": "cors",
+          "title": "State-changing methods allowed cross-origin to an untrusted origin",
+          "severity": "medium",
+          "description": "The preflight response approves methods that change server state for an origin that should not be trusted.",
+          "evidence": "Access-Control-Allow-Methods: GET, POST, PUT, DELETE",
+          "remediation": "Allow only the methods the trusted front-end needs, and only for trusted origins.",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS",
+          "cwe": "CWE-942"
+        },
+        {
+          "check_id": "HDR-CSP-UNSAFE-EVAL",
+          "category": "headers",
+          "title": "CSP allows 'unsafe-eval'",
+          "severity": "low",
+          "description": "eval()/Function() style code execution is permitted.",
+          "evidence": "script-src: 'self' 'unsafe-inline' 'unsafe-eval' https:",
+          "remediation": "Remove 'unsafe-eval' and refactor code that needs it.",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP",
+          "cwe": "CWE-693"
+        },
+        {
+          "check_id": "HDR-CSP-OBJECT-SRC",
+          "category": "headers",
+          "title": "CSP does not lock down object-src",
+          "severity": "low",
+          "description": "Plugins (<object>/<embed>) are not restricted to 'none'.",
+          "evidence": "object-src: (not set, no default-src fallback)",
+          "remediation": "Add object-src 'none'.",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP",
+          "cwe": "CWE-693"
+        },
+        {
+          "check_id": "HDR-CSP-BASE-URI",
+          "category": "headers",
+          "title": "CSP does not restrict base-uri",
+          "severity": "low",
+          "description": "An injected <base> tag could redirect relative URLs; base-uri is not covered by default-src.",
+          "evidence": "base-uri directive not present.",
+          "remediation": "Add base-uri 'none' (or 'self').",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP",
+          "cwe": "CWE-693"
+        },
+        {
+          "check_id": "HDR-XCTO-MISSING",
+          "category": "headers",
+          "title": "X-Content-Type-Options: nosniff missing",
+          "severity": "low",
+          "description": "Browsers may MIME-sniff responses and execute content as a different type.",
+          "evidence": "Header not present in the response.",
+          "remediation": "X-Content-Type-Options: nosniff",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options",
+          "cwe": "CWE-693"
+        },
+        {
+          "check_id": "HDR-PERMISSIONS-MISSING",
+          "category": "headers",
+          "title": "Permissions-Policy missing",
+          "severity": "low",
+          "description": "Powerful browser features (camera, microphone, geolocation...) are not explicitly restricted.",
+          "evidence": "Header not present in the response.",
+          "remediation": "Permissions-Policy: geolocation=(), camera=(), microphone=()",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy",
+          "cwe": "CWE-693"
+        },
+        {
+          "check_id": "INFO-SERVER-VERSION",
+          "category": "headers",
+          "title": "Server header discloses a version",
+          "severity": "low",
+          "description": "Version banners help attackers pick exploits for known vulnerabilities.",
+          "evidence": "Server: Apache/2.4.49 (Unix)",
+          "remediation": "Strip the version (e.g. nginx: server_tokens off; Apache: ServerTokens Prod).",
+          "reference": "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html",
+          "cwe": "CWE-200"
+        },
+        {
+          "check_id": "INFO-X-POWERED-BY",
+          "category": "headers",
+          "title": "X-Powered-By header discloses technology",
+          "severity": "low",
+          "description": "Framework/runtime banners reveal the technology stack.",
+          "evidence": "X-Powered-By: PHP/7.4.3",
+          "remediation": "Remove the X-Powered-By header in the framework or reverse-proxy configuration.",
+          "reference": "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html",
+          "cwe": "CWE-200"
+        },
+        {
+          "check_id": "COOKIE-SAMESITE-sessionid",
+          "category": "cookies",
+          "title": "Cookie 'sessionid' has no SameSite attribute",
+          "severity": "low",
+          "description": "Behaviour then depends on the browser default; explicit SameSite helps against CSRF.",
+          "evidence": "Cookie 'sessionid' (value redacted); attributes: path",
+          "remediation": "Add SameSite=Lax (or Strict).",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie",
+          "cwe": "CWE-1275"
+        },
+        {
+          "check_id": "COOKIE-HTTPONLY-theme",
+          "category": "cookies",
+          "title": "Cookie 'theme' missing HttpOnly flag",
+          "severity": "low",
+          "description": "JavaScript can read the cookie, so any XSS can steal it.",
+          "evidence": "Cookie 'theme' (value redacted); attributes: path",
+          "remediation": "Add the HttpOnly attribute.",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie",
+          "cwe": "CWE-1004"
+        },
+        {
+          "check_id": "COOKIE-SAMESITE-theme",
+          "category": "cookies",
+          "title": "Cookie 'theme' has no SameSite attribute",
+          "severity": "low",
+          "description": "Behaviour then depends on the browser default; explicit SameSite helps against CSRF.",
+          "evidence": "Cookie 'theme' (value redacted); attributes: path",
+          "remediation": "Add SameSite=Lax (or Strict).",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie",
+          "cwe": "CWE-1275"
+        },
+        {
+          "check_id": "CORS-VARY-MISSING",
+          "category": "cors",
+          "title": "Dynamic CORS response lacks Vary: Origin",
+          "severity": "low",
+          "description": "Shared caches may serve one origin's CORS headers to another origin (cache poisoning or intermittent breakage).",
+          "evidence": "Vary: (not set)",
+          "remediation": "Add 'Vary: Origin' whenever Access-Control-Allow-Origin depends on the request.",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS",
+          "cwe": "CWE-942"
+        },
+        {
+          "check_id": "CORS-PREFLIGHT-HEADERS",
+          "category": "cors",
+          "title": "Preflight allows arbitrary request headers",
+          "severity": "low",
+          "description": "A wildcard or echoed Allow-Headers lets untrusted origins send any custom header, e.g. Authorization.",
+          "evidence": "Access-Control-Allow-Headers: authorization, x-audit-probe",
+          "remediation": "List the exact headers required.",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS",
+          "cwe": "CWE-942"
+        },
+        {
+          "check_id": "TLS-LOOPBACK-SKIPPED",
+          "category": "transport",
+          "title": "HTTPS checks skipped for loopback target",
+          "severity": "info",
+          "description": "HSTS, Secure-cookie and HTTP->HTTPS checks are not meaningful on localhost.",
+          "evidence": "Target host: localhost",
+          "remediation": "",
+          "reference": "",
+          "cwe": ""
+        },
+        {
+          "check_id": "HDR-CROSS-ORIGIN-ISOLATION",
+          "category": "headers",
+          "title": "Cross-origin isolation headers not set",
+          "severity": "info",
+          "description": "COOP/COEP/CORP mitigate cross-origin leaks (Spectre-style) and window handle abuse. They are recommended hardening rather than a vulnerability.",
+          "evidence": "Missing: Cross-Origin-Opener-Policy, Cross-Origin-Embedder-Policy, Cross-Origin-Resource-Policy",
+          "remediation": "Cross-Origin-Opener-Policy: same-origin; Cross-Origin-Resource-Policy: same-origin (where compatible).",
+          "reference": "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html",
+          "cwe": ""
+        },
+        {
+          "check_id": "HDR-XXSS-LEGACY",
+          "category": "headers",
+          "title": "Legacy X-XSS-Protection filter enabled",
+          "severity": "info",
+          "description": "The old XSS auditor is removed from modern browsers and could itself introduce side-channel issues in older ones.",
+          "evidence": "X-XSS-Protection: 1; mode=block",
+          "remediation": "Send X-XSS-Protection: 0 (or omit) and rely on a strict CSP.",
+          "reference": "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html",
+          "cwe": ""
+        },
+        {
+          "check_id": "CORS-PREFLIGHT-MAXAGE",
+          "category": "cors",
+          "title": "Very long preflight cache time",
+          "severity": "info",
+          "description": "Policy changes take a long time to take effect (browsers cap the value anyway).",
+          "evidence": "Access-Control-Max-Age: 86400000",
+          "remediation": "Use 600-7200 seconds.",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS",
+          "cwe": ""
+        }
+      ],
+      "passed": [],
+      "score": 0,
+      "grade": "F",
+      "counts": {
+        "critical": 1,
+        "high": 0,
+        "medium": 6,
+        "low": 12,
+        "info": 4
+      }
+    },
+    {
+      "target": "http://localhost:8082/",
+      "final_url": "http://localhost:8082/",
+      "status_code": 200,
+      "scanned_at": "2026-10-21T20:45:09+00:00",
+      "redirect_chain": [
+        "200 http://localhost:8082/"
+      ],
+      "requests_made": 6,
+      "error": "",
+      "findings": [
+        {
+          "check_id": "CORS-NULL-ORIGIN",
+          "category": "cors",
+          "title": "Origin 'null' is trusted with credentials",
+          "severity": "high",
+          "description": "Sandboxed iframes, data: URLs and local files send Origin: null, so an attacker can trigger requests that the server will accept.",
+          "evidence": "Origin: null -> Access-Control-Allow-Origin: null; Allow-Credentials: true",
+          "remediation": "Never allow 'null' in the origin allow-list.",
+          "reference": "https://portswigger.net/web-security/cors",
+          "cwe": "CWE-942"
+        },
+        {
+          "check_id": "CORS-ORIGIN-VALIDATION-BYPASS",
+          "category": "cors",
+          "title": "Origin validation can be bypassed (credentials allowed)",
+          "severity": "high",
+          "description": "Look-alike origins that merely start or end with the real hostname are accepted, which indicates substring/prefix/suffix matching instead of exact comparison.",
+          "evidence": "http://localhost.evil-attacker.example -> http://localhost.evil-attacker.example; http://evillocalhost -> http://evillocalhost",
+          "remediation": "Compare the full, parsed origin against an exact allow-list; avoid startswith/endswith/regex shortcuts.",
+          "reference": "https://portswigger.net/web-security/cors",
+          "cwe": "CWE-942"
+        },
+        {
+          "check_id": "COOKIE-SAMESITE-NONE-sid",
+          "category": "cookies",
+          "title": "Cookie 'sid' uses SameSite=None without Secure",
+          "severity": "medium",
+          "description": "Browsers reject SameSite=None cookies that are not Secure, and it exposes the cookie to cross-site requests.",
+          "evidence": "Cookie 'sid' (value redacted); attributes: httponly, path, samesite",
+          "remediation": "Add Secure, or use SameSite=Lax/Strict.",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie",
+          "cwe": "CWE-1275"
+        },
+        {
+          "check_id": "TLS-LOOPBACK-SKIPPED",
+          "category": "transport",
+          "title": "HTTPS checks skipped for loopback target",
+          "severity": "info",
+          "description": "HSTS, Secure-cookie and HTTP->HTTPS checks are not meaningful on localhost.",
+          "evidence": "Target host: localhost",
+          "remediation": "",
+          "reference": "",
+          "cwe": ""
+        }
+      ],
+      "passed": [
+        {
+          "id": "HDR-CSP",
+          "description": "Content-Security-Policy present and free of common weaknesses"
+        },
+        {
+          "id": "HDR-FRAMING",
+          "description": "Clickjacking protection via CSP frame-ancestors"
+        },
+        {
+          "id": "HDR-XCTO",
+          "description": "X-Content-Type-Options: nosniff"
+        },
+        {
+          "id": "HDR-REFERRER",
+          "description": "Referrer-Policy: strict-origin-when-cross-origin"
+        },
+        {
+          "id": "HDR-PERMISSIONS",
+          "description": "Permissions-Policy present"
+        },
+        {
+          "id": "HDR-CROSS-ORIGIN-ISOLATION",
+          "description": "COOP, COEP and CORP all set"
+        },
+        {
+          "id": "INFO-SERVER",
+          "description": "Server header does not reveal a version"
+        },
+        {
+          "id": "CORS-ARBITRARY",
+          "description": "Unrelated origins are not granted CORS access"
+        },
+        {
+          "id": "CORS-VARY",
+          "description": "Vary: Origin present on dynamic CORS responses"
+        },
+        {
+          "id": "CORS-PREFLIGHT",
+          "description": "Preflight is not granted to an untrusted origin"
+        }
+      ],
+      "score": 38,
+      "grade": "F",
+      "counts": {
+        "critical": 0,
+        "high": 2,
+        "medium": 1,
+        "low": 0,
+        "info": 1
+      }
+    },
+    {
+      "target": "http://localhost:8083/",
+      "final_url": "http://localhost:8083/",
+      "status_code": 200,
+      "scanned_at": "2026-10-21T20:45:10+00:00",
+      "redirect_chain": [
+        "200 http://localhost:8083/"
+      ],
+      "requests_made": 6,
+      "error": "",
+      "findings": [
+        {
+          "check_id": "HDR-CSP-MISSING",
+          "category": "headers",
+          "title": "Content-Security-Policy missing",
+          "severity": "medium",
+          "description": "CSP is the main defence-in-depth control against XSS and data injection.",
+          "evidence": "Header not present in the response.",
+          "remediation": "Start from: default-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'  and tighten per page.",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP",
+          "cwe": "CWE-693"
+        },
+        {
+          "check_id": "HDR-REFERRER-MISSING",
+          "category": "headers",
+          "title": "Referrer-Policy missing",
+          "severity": "low",
+          "description": "Without an explicit policy, referrer leakage depends on browser defaults.",
+          "evidence": "Header not present in the response.",
+          "remediation": "Referrer-Policy: strict-origin-when-cross-origin  (or no-referrer)",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy",
+          "cwe": "CWE-200"
+        },
+        {
+          "check_id": "HDR-PERMISSIONS-MISSING",
+          "category": "headers",
+          "title": "Permissions-Policy missing",
+          "severity": "low",
+          "description": "Powerful browser features (camera, microphone, geolocation...) are not explicitly restricted.",
+          "evidence": "Header not present in the response.",
+          "remediation": "Permissions-Policy: geolocation=(), camera=(), microphone=()",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy",
+          "cwe": "CWE-693"
+        },
+        {
+          "check_id": "CORS-WILDCARD",
+          "category": "cors",
+          "title": "Access-Control-Allow-Origin is a wildcard",
+          "severity": "low",
+          "description": "Any website can read responses from this URL. That is fine for fully public, unauthenticated data but wrong for anything user-specific.",
+          "evidence": "Access-Control-Allow-Origin: * (Allow-Credentials: not set)",
+          "remediation": "Replace * with an allow-list of origins unless the resource is intentionally public.",
+          "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS",
+          "cwe": "CWE-942"
+        },
+        {
+          "check_id": "TLS-LOOPBACK-SKIPPED",
+          "category": "transport",
+          "title": "HTTPS checks skipped for loopback target",
+          "severity": "info",
+          "description": "HSTS, Secure-cookie and HTTP->HTTPS checks are not meaningful on localhost.",
+          "evidence": "Target host: localhost",
+          "remediation": "",
+          "reference": "",
+          "cwe": ""
+        },
+        {
+          "check_id": "HDR-CROSS-ORIGIN-ISOLATION",
+          "category": "headers",
+          "title": "Cross-origin isolation headers not set",
+          "severity": "info",
+          "description": "COOP/COEP/CORP mitigate cross-origin leaks (Spectre-style) and window handle abuse. They are recommended hardening rather than a vulnerability.",
+          "evidence": "Missing: Cross-Origin-Opener-Policy, Cross-Origin-Embedder-Policy, Cross-Origin-Resource-Policy",
+          "remediation": "Cross-Origin-Opener-Policy: same-origin; Cross-Origin-Resource-Policy: same-origin (where compatible).",
+          "reference": "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html",
+          "cwe": ""
+        }
+      ],
+      "passed": [
+        {
+          "id": "HDR-FRAMING",
+          "description": "Clickjacking protection via X-Frame-Options: SAMEORIGIN"
+        },
+        {
+          "id": "HDR-XCTO",
+          "description": "X-Content-Type-Options: nosniff"
+        },
+        {
+          "id": "INFO-SERVER",
+          "description": "Server header does not reveal a version"
+        },
+        {
+          "id": "CORS-PREFLIGHT",
+          "description": "Preflight answer is permissive in origin only; methods/headers are tight"
+        }
+      ],
+      "score": 76,
+      "grade": "C",
+      "counts": {
+        "critical": 0,
+        "high": 0,
+        "medium": 1,
+        "low": 3,
+        "info": 2
+      }
+    },
+    {
+      "target": "http://localhost:8084/",
+      "final_url": "http://localhost:8084/",
+      "status_code": 200,
+      "scanned_at": "2026-10-21T20:45:10+00:00",
+      "redirect_chain": [
+        "200 http://localhost:8084/"
+      ],
+      "requests_made": 6,
+      "error": "",
+      "findings": [
+        {
+          "check_id": "TLS-LOOPBACK-SKIPPED",
+          "category": "transport",
+          "title": "HTTPS checks skipped for loopback target",
+          "severity": "info",
+          "description": "HSTS, Secure-cookie and HTTP->HTTPS checks are not meaningful on localhost.",
+          "evidence": "Target host: localhost",
+          "remediation": "",
+          "reference": "",
+          "cwe": ""
+        }
+      ],
+      "passed": [
+        {
+          "id": "HDR-CSP",
+          "description": "Content-Security-Policy present and free of common weaknesses"
+        },
+        {
+          "id": "HDR-FRAMING",
+          "description": "Clickjacking protection via CSP frame-ancestors"
+        },
+        {
+          "id": "HDR-XCTO",
+          "description": "X-Content-Type-Options: nosniff"
+        },
+        {
+          "id": "HDR-REFERRER",
+          "description": "Referrer-Policy: strict-origin-when-cross-origin"
+        },
+        {
+          "id": "HDR-PERMISSIONS",
+          "description": "Permissions-Policy present"
+        },
+        {
+          "id": "HDR-CROSS-ORIGIN-ISOLATION",
+          "description": "COOP, COEP and CORP all set"
+        },
+        {
+          "id": "INFO-SERVER",
+          "description": "Server header does not reveal a version"
+        },
+        {
+          "id": "COOKIE-__Host-session",
+          "description": "Cookie '__Host-session' has secure attributes"
+        },
+        {
+          "id": "CORS-ARBITRARY",
+          "description": "Unrelated origins are not granted CORS access"
+        },
+        {
+          "id": "CORS-PREFLIGHT",
+          "description": "Preflight is not granted to an untrusted origin"
+        }
+      ],
+      "score": 100,
+      "grade": "A",
+      "counts": {
+        "critical": 0,
+        "high": 0,
+        "medium": 0,
+        "low": 0,
+        "info": 1
+      }
+    }
+  ]
+}

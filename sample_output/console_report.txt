@@ -1,0 +1,246 @@
+==============================================================================
+Target : http://localhost:8081/
+Final  : http://localhost:8081/   (HTTP 200, 3 requests)
+Grade  : F   Score: 0/100   critical=1  medium=6  low=12  info=4
+------------------------------------------------------------------------------
+[CRITICAL] Arbitrary Origin is reflected WITH credentials  (CORS-REFLECT-ORIGIN)
+    The server echoes whatever Origin it receives into Access-Control-Allow-Origin and allows credentials, so any website can make authenticated requests as the victim and read the responses.
+    Evidence   : Origin: https://evil-attacker.example -> Access-Control-Allow-Origin: https://evil-attacker.example; Access-Control-Allow-Credentials: true
+    Remediation: Validate Origin against an exact allow-list of trusted origins and only then echo it; never combine reflection with Allow-Credentials.
+    CWE        : CWE-942
+
+[MEDIUM] CSP allows 'unsafe-inline' scripts  (HDR-CSP-UNSAFE-INLINE)
+    Inline <script> and event handlers are allowed, which defeats most of CSP's XSS protection.
+    Evidence   : script-src: 'self' 'unsafe-inline' 'unsafe-eval' https:
+    Remediation: Remove 'unsafe-inline'; use nonces or hashes instead.
+    CWE        : CWE-693
+
+[MEDIUM] CSP allows scripts from overly broad sources  (HDR-CSP-BROAD-SOURCE)
+    Scheme-wide or wildcard script sources let an attacker load code from any host.
+    Evidence   : script-src contains: https:
+    Remediation: List explicit trusted hosts or use nonces with 'strict-dynamic'.
+    CWE        : CWE-693
+
+[MEDIUM] No clickjacking protection  (HDR-XFO-MISSING)
+    Neither X-Frame-Options nor CSP frame-ancestors is set, so the page can be framed by any site (UI redressing / clickjacking).
+    Evidence   : X-Frame-Options and CSP frame-ancestors not present.
+    Remediation: Content-Security-Policy: frame-ancestors 'none'  (or 'self'); add X-Frame-Options: DENY for legacy browsers.
+    CWE        : CWE-1021
+
+[MEDIUM] Referrer-Policy leaks full URLs  (HDR-REFERRER-UNSAFE)
+    unsafe-url sends the full URL (path and query) to every destination, including over HTTP.
+    Evidence   : Referrer-Policy: unsafe-url
+    Remediation: Referrer-Policy: strict-origin-when-cross-origin  (or no-referrer)
+    CWE        : CWE-200
+
+[MEDIUM] Cookie 'sessionid' missing HttpOnly flag  (COOKIE-HTTPONLY-sessionid)
+    JavaScript can read the cookie, so any XSS can steal it.
+    Evidence   : Cookie 'sessionid' (value redacted); attributes: path
+    Remediation: Add the HttpOnly attribute.
+    CWE        : CWE-1004
+
+[MEDIUM] State-changing methods allowed cross-origin to an untrusted origin  (CORS-PREFLIGHT-METHODS)
+    The preflight response approves methods that change server state for an origin that should not be trusted.
+    Evidence   : Access-Control-Allow-Methods: GET, POST, PUT, DELETE
+    Remediation: Allow only the methods the trusted front-end needs, and only for trusted origins.
+    CWE        : CWE-942
+
+[LOW] CSP allows 'unsafe-eval'  (HDR-CSP-UNSAFE-EVAL)
+    eval()/Function() style code execution is permitted.
+    Evidence   : script-src: 'self' 'unsafe-inline' 'unsafe-eval' https:
+    Remediation: Remove 'unsafe-eval' and refactor code that needs it.
+    CWE        : CWE-693
+
+[LOW] CSP does not lock down object-src  (HDR-CSP-OBJECT-SRC)
+    Plugins (<object>/<embed>) are not restricted to 'none'.
+    Evidence   : object-src: (not set, no default-src fallback)
+    Remediation: Add object-src 'none'.
+    CWE        : CWE-693
+
+[LOW] CSP does not restrict base-uri  (HDR-CSP-BASE-URI)
+    An injected <base> tag could redirect relative URLs; base-uri is not covered by default-src.
+    Evidence   : base-uri directive not present.
+    Remediation: Add base-uri 'none' (or 'self').
+    CWE        : CWE-693
+
+[LOW] X-Content-Type-Options: nosniff missing  (HDR-XCTO-MISSING)
+    Browsers may MIME-sniff responses and execute content as a different type.
+    Evidence   : Header not present in the response.
+    Remediation: X-Content-Type-Options: nosniff
+    CWE        : CWE-693
+
+[LOW] Permissions-Policy missing  (HDR-PERMISSIONS-MISSING)
+    Powerful browser features (camera, microphone, geolocation...) are not explicitly restricted.
+    Evidence   : Header not present in the response.
+    Remediation: Permissions-Policy: geolocation=(), camera=(), microphone=()
+    CWE        : CWE-693
+
+[LOW] Server header discloses a version  (INFO-SERVER-VERSION)
+    Version banners help attackers pick exploits for known vulnerabilities.
+    Evidence   : Server: Apache/2.4.49 (Unix)
+    Remediation: Strip the version (e.g. nginx: server_tokens off; Apache: ServerTokens Prod).
+    CWE        : CWE-200
+
+[LOW] X-Powered-By header discloses technology  (INFO-X-POWERED-BY)
+    Framework/runtime banners reveal the technology stack.
+    Evidence   : X-Powered-By: PHP/7.4.3
+    Remediation: Remove the X-Powered-By header in the framework or reverse-proxy configuration.
+    CWE        : CWE-200
+
+[LOW] Cookie 'sessionid' has no SameSite attribute  (COOKIE-SAMESITE-sessionid)
+    Behaviour then depends on the browser default; explicit SameSite helps against CSRF.
+    Evidence   : Cookie 'sessionid' (value redacted); attributes: path
+    Remediation: Add SameSite=Lax (or Strict).
+    CWE        : CWE-1275
+
+[LOW] Cookie 'theme' missing HttpOnly flag  (COOKIE-HTTPONLY-theme)
+    JavaScript can read the cookie, so any XSS can steal it.
+    Evidence   : Cookie 'theme' (value redacted); attributes: path
+    Remediation: Add the HttpOnly attribute.
+    CWE        : CWE-1004
+
+[LOW] Cookie 'theme' has no SameSite attribute  (COOKIE-SAMESITE-theme)
+    Behaviour then depends on the browser default; explicit SameSite helps against CSRF.
+    Evidence   : Cookie 'theme' (value redacted); attributes: path
+    Remediation: Add SameSite=Lax (or Strict).
+    CWE        : CWE-1275
+
+[LOW] Dynamic CORS response lacks Vary: Origin  (CORS-VARY-MISSING)
+    Shared caches may serve one origin's CORS headers to another origin (cache poisoning or intermittent breakage).
+    Evidence   : Vary: (not set)
+    Remediation: Add 'Vary: Origin' whenever Access-Control-Allow-Origin depends on the request.
+    CWE        : CWE-942
+
+[LOW] Preflight allows arbitrary request headers  (CORS-PREFLIGHT-HEADERS)
+    A wildcard or echoed Allow-Headers lets untrusted origins send any custom header, e.g. Authorization.
+    Evidence   : Access-Control-Allow-Headers: authorization, x-audit-probe
+    Remediation: List the exact headers required.
+    CWE        : CWE-942
+
+[INFO] HTTPS checks skipped for loopback target  (TLS-LOOPBACK-SKIPPED)
+    HSTS, Secure-cookie and HTTP->HTTPS checks are not meaningful on localhost.
+    Evidence   : Target host: localhost
+
+[INFO] Cross-origin isolation headers not set  (HDR-CROSS-ORIGIN-ISOLATION)
+    COOP/COEP/CORP mitigate cross-origin leaks (Spectre-style) and window handle abuse. They are recommended hardening rather than a vulnerability.
+    Evidence   : Missing: Cross-Origin-Opener-Policy, Cross-Origin-Embedder-Policy, Cross-Origin-Resource-Policy
+    Remediation: Cross-Origin-Opener-Policy: same-origin; Cross-Origin-Resource-Policy: same-origin (where compatible).
+
+[INFO] Legacy X-XSS-Protection filter enabled  (HDR-XXSS-LEGACY)
+    The old XSS auditor is removed from modern browsers and could itself introduce side-channel issues in older ones.
+    Evidence   : X-XSS-Protection: 1; mode=block
+    Remediation: Send X-XSS-Protection: 0 (or omit) and rely on a strict CSP.
+
+[INFO] Very long preflight cache time  (CORS-PREFLIGHT-MAXAGE)
+    Policy changes take a long time to take effect (browsers cap the value anyway).
+    Evidence   : Access-Control-Max-Age: 86400000
+    Remediation: Use 600-7200 seconds.
+
+Passed checks (0):
+==============================================================================
+Target : http://localhost:8082/
+Final  : http://localhost:8082/   (HTTP 200, 6 requests)
+Grade  : F   Score: 38/100   high=2  medium=1  info=1
+------------------------------------------------------------------------------
+[HIGH] Origin 'null' is trusted with credentials  (CORS-NULL-ORIGIN)
+    Sandboxed iframes, data: URLs and local files send Origin: null, so an attacker can trigger requests that the server will accept.
+    Evidence   : Origin: null -> Access-Control-Allow-Origin: null; Allow-Credentials: true
+    Remediation: Never allow 'null' in the origin allow-list.
+    CWE        : CWE-942
+
+[HIGH] Origin validation can be bypassed (credentials allowed)  (CORS-ORIGIN-VALIDATION-BYPASS)
+    Look-alike origins that merely start or end with the real hostname are accepted, which indicates substring/prefix/suffix matching instead of exact comparison.
+    Evidence   : http://localhost.evil-attacker.example -> http://localhost.evil-attacker.example; http://evillocalhost -> http://evillocalhost
+    Remediation: Compare the full, parsed origin against an exact allow-list; avoid startswith/endswith/regex shortcuts.
+    CWE        : CWE-942
+
+[MEDIUM] Cookie 'sid' uses SameSite=None without Secure  (COOKIE-SAMESITE-NONE-sid)
+    Browsers reject SameSite=None cookies that are not Secure, and it exposes the cookie to cross-site requests.
+    Evidence   : Cookie 'sid' (value redacted); attributes: httponly, path, samesite
+    Remediation: Add Secure, or use SameSite=Lax/Strict.
+    CWE        : CWE-1275
+
+[INFO] HTTPS checks skipped for loopback target  (TLS-LOOPBACK-SKIPPED)
+    HSTS, Secure-cookie and HTTP->HTTPS checks are not meaningful on localhost.
+    Evidence   : Target host: localhost
+
+Passed checks (10):
+  + Content-Security-Policy present and free of common weaknesses
+  + Clickjacking protection via CSP frame-ancestors
+  + X-Content-Type-Options: nosniff
+  + Referrer-Policy: strict-origin-when-cross-origin
+  + Permissions-Policy present
+  + COOP, COEP and CORP all set
+  + Server header does not reveal a version
+  + Unrelated origins are not granted CORS access
+  + Vary: Origin present on dynamic CORS responses
+  + Preflight is not granted to an untrusted origin
+==============================================================================
+Target : http://localhost:8083/
+Final  : http://localhost:8083/   (HTTP 200, 6 requests)
+Grade  : C   Score: 76/100   medium=1  low=3  info=2
+------------------------------------------------------------------------------
+[MEDIUM] Content-Security-Policy missing  (HDR-CSP-MISSING)
+    CSP is the main defence-in-depth control against XSS and data injection.
+    Evidence   : Header not present in the response.
+    Remediation: Start from: default-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'  and tighten per page.
+    CWE        : CWE-693
+
+[LOW] Referrer-Policy missing  (HDR-REFERRER-MISSING)
+    Without an explicit policy, referrer leakage depends on browser defaults.
+    Evidence   : Header not present in the response.
+    Remediation: Referrer-Policy: strict-origin-when-cross-origin  (or no-referrer)
+    CWE        : CWE-200
+
+[LOW] Permissions-Policy missing  (HDR-PERMISSIONS-MISSING)
+    Powerful browser features (camera, microphone, geolocation...) are not explicitly restricted.
+    Evidence   : Header not present in the response.
+    Remediation: Permissions-Policy: geolocation=(), camera=(), microphone=()
+    CWE        : CWE-693
+
+[LOW] Access-Control-Allow-Origin is a wildcard  (CORS-WILDCARD)
+    Any website can read responses from this URL. That is fine for fully public, unauthenticated data but wrong for anything user-specific.
+    Evidence   : Access-Control-Allow-Origin: * (Allow-Credentials: not set)
+    Remediation: Replace * with an allow-list of origins unless the resource is intentionally public.
+    CWE        : CWE-942
+
+[INFO] HTTPS checks skipped for loopback target  (TLS-LOOPBACK-SKIPPED)
+    HSTS, Secure-cookie and HTTP->HTTPS checks are not meaningful on localhost.
+    Evidence   : Target host: localhost
+
+[INFO] Cross-origin isolation headers not set  (HDR-CROSS-ORIGIN-ISOLATION)
+    COOP/COEP/CORP mitigate cross-origin leaks (Spectre-style) and window handle abuse. They are recommended hardening rather than a vulnerability.
+    Evidence   : Missing: Cross-Origin-Opener-Policy, Cross-Origin-Embedder-Policy, Cross-Origin-Resource-Policy
+    Remediation: Cross-Origin-Opener-Policy: same-origin; Cross-Origin-Resource-Policy: same-origin (where compatible).
+
+Passed checks (4):
+  + Clickjacking protection via X-Frame-Options: SAMEORIGIN
+  + X-Content-Type-Options: nosniff
+  + Server header does not reveal a version
+  + Preflight answer is permissive in origin only; methods/headers are tight
+==============================================================================
+Target : http://localhost:8084/
+Final  : http://localhost:8084/   (HTTP 200, 6 requests)
+Grade  : A   Score: 100/100   info=1
+------------------------------------------------------------------------------
+[INFO] HTTPS checks skipped for loopback target  (TLS-LOOPBACK-SKIPPED)
+    HSTS, Secure-cookie and HTTP->HTTPS checks are not meaningful on localhost.
+    Evidence   : Target host: localhost
+
+Passed checks (10):
+  + Content-Security-Policy present and free of common weaknesses
+  + Clickjacking protection via CSP frame-ancestors
+  + X-Content-Type-Options: nosniff
+  + Referrer-Policy: strict-origin-when-cross-origin
+  + Permissions-Policy present
+  + COOP, COEP and CORP all set
+  + Server header does not reveal a version
+  + Cookie '__Host-session' has secure attributes
+  + Unrelated origins are not granted CORS access
+  + Preflight is not granted to an untrusted origin
+==============================================================================
+Summary
+  F    0/100  http://localhost:8081/
+  F   38/100  http://localhost:8082/
+  C   76/100  http://localhost:8083/
+  A  100/100  http://localhost:8084/
